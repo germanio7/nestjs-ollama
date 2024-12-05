@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
+import { log } from 'console';
 
 @Injectable()
 export class ExternalApiService {
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async sendData(bodyData: any) {
     const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
@@ -19,11 +20,33 @@ export class ExternalApiService {
     return data;
   }
 
-  async handleWebhook(payload: any) {
+  async subscriptionWebhook(payload: any) {
     try {
-      console.log('Webhook recibido:', payload);
+      console.log("payload", payload);
 
-      return payload.hub_challenge;
+      return payload['hub.challenge'];
+    } catch (error) {
+      console.error('Error procesando webhook:', error);
+      throw error;
+    }
+  }
+
+  async receiveWebhook(payload: any) {
+    try {
+      if (payload.entry[0].changes[0].value.messages[0].type == 'text') {
+        const message = payload.entry[0].changes[0].value.messages[0].text.body;
+
+        const result = this.sendData({
+          model: 'llama3.2',
+          prompt: message,
+          stream: false
+        });
+
+        console.log(result);
+
+      }
+
+      return;
     } catch (error) {
       console.error('Error procesando webhook:', error);
       throw error;
