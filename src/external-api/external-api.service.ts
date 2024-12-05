@@ -35,15 +35,15 @@ export class ExternalApiService {
     try {
       if (payload.entry[0].changes[0].value.messages[0].type == 'text') {
         const message = payload.entry[0].changes[0].value.messages[0].text.body;
+        console.log(message);
 
-        const result = this.sendData({
+        const result = await this.sendData({
           model: 'llama3.2',
           prompt: message,
           stream: false
         });
 
-        console.log(result);
-
+        console.log(result.response);
       }
 
       return;
