@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
-
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 @Injectable()
 export class ExternalApiService {
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
-  ) {}
+    @InjectQueue('messageQueue') private messageQueue: Queue
+  ) { }
 
   async sendData(bodyData: any) {
     const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
@@ -60,30 +62,12 @@ export class ExternalApiService {
     try {
       phone_number = phone_number.substring(3);
 
-      const apiUrl = this.configService.get<string>('WHATSAPP_URL');
-      const token = this.configService.get<string>('WHATSAPP_TOKEN');
-
-      const params = {
-        messaging_product: 'whatsapp',
-        recipient_type: 'individual',
+      const job = await this.messageQueue.add('sendMessage', {
         to: '54' + phone_number,
-        type: 'text',
-        text: {
-          preview_url: false,
-          body: message,
-        },
-      };
+        prompt: message
+      });
 
-      const { data } = await lastValueFrom(
-        this.httpService.post(`${apiUrl}`, params, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }),
-      );
-
-      return data;
+      return;
     } catch (error) {
       console.error('Error enviando whatsapp:', error);
       return;
