@@ -1,13 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { ConfigService } from '@nestjs/config';
 import { ExternalApiService } from './external-api.service';
 
 @Processor('messageQueue')
 export class ExternalApiProcessor extends WorkerHost {
-  constructor(
-    private readonly externalApiservice: ExternalApiService,
-    private configService: ConfigService,
-  ) {
+  constructor(private readonly externalApiservice: ExternalApiService) {
     super();
   }
 
