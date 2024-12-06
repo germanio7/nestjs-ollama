@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -9,12 +9,11 @@ export class ExternalApiService {
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
-    @InjectQueue('messageQueue') private messageQueue: Queue
-  ) { }
+    @InjectQueue('messageQueue') private messageQueue: Queue,
+  ) {}
 
   async sendData(bodyData: any) {
     const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
-
     const { data } = await firstValueFrom(
       this.httpService.post(`${apiUrl}/api/generate`, bodyData),
     );
@@ -41,10 +40,9 @@ export class ExternalApiService {
 
         const job = await this.messageQueue.add('sendMessage', {
           from: from,
-          message: message
+          message: message,
         });
       }
-
       return;
     } catch (error) {
       console.error('Error procesando webhook:', error);
@@ -55,13 +53,28 @@ export class ExternalApiService {
   async sendWhatsapp(phone_number: string, message: string) {
     try {
       phone_number = phone_number.substring(3);
-
-      const job = await this.messageQueue.add('sendMessage', {
+      const apiUrl = this.configService.get<string>('WHATSAPP_URL');
+      const token = this.configService.get<string>('WHATSAPP_TOKEN');
+      const params = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
         to: '54' + phone_number,
-        prompt: message
-      });
+        type: 'text',
+        text: {
+          preview_url: false,
+          body: message,
+        },
+      };
+      const result = await lastValueFrom(
+        this.httpService.post(`${apiUrl}`, params, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      );
 
-      return;
+      return result;
     } catch (error) {
       console.error('Error enviando whatsapp:', error);
       return;

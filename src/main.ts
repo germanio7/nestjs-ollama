@@ -2,10 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { getBotToken } from 'nestjs-telegraf';
+import { BotService } from './telegram/bot.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const bot = app.get(getBotToken());
+  const botService = app.get(BotService);
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
@@ -17,7 +19,7 @@ async function bootstrap() {
 
   app.use(bot.webhookCallback('/secret-path'));
 
-  // bot.on('text', (ctx) => ctx.reply(`Has dicho: ${ctx.message.text}`));
+  bot.on('text', (ctx) => botService.handleTextMessage(ctx));
 
   await app.listen(process.env.PORT ?? 3000);
 }

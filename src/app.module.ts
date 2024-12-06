@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ExternalApiService } from './external-api/external-api.service';
 import { ExternalApiController } from './external-api/external-api.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { ExternalApiProcessor } from './external-api/external-api.processor';
 import { BotModule } from './telegram/bot.module';
-// import { TelegrafModule } from 'nestjs-telegraf';
+import { BotService } from './telegram/bot.service';
 
 @Module({
   imports: [
@@ -26,7 +26,7 @@ import { BotModule } from './telegram/bot.module';
     BotModule,
   ],
   controllers: [ExternalApiController],
-  providers: [ExternalApiService, ExternalApiProcessor],
-  exports: [ExternalApiService],
+  providers: [ExternalApiService, ExternalApiProcessor, BotService],
+  exports: [ExternalApiService, BotService],
 })
-export class AppModule { }
+export class AppModule {}
