@@ -17,6 +17,8 @@ async function bootstrap() {
 
   app.use(bot.webhookCallback('/secret-path'));
 
+  // bot.on('text', (ctx) => ctx.reply(`Has dicho: ${ctx.message.text}`));
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

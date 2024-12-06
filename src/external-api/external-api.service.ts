@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';

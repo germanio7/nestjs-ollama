@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom, from, lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 @Processor('messageQueue')
 export class ExternalApiProcessor extends WorkerHost {
