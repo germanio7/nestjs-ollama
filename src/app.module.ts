@@ -7,6 +7,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ExternalApiProcessor } from './external-api/external-api.processor';
 import { BotModule } from './telegram/bot.module';
 import { BotService } from './telegram/bot.service';
+import { Telegraf } from 'telegraf';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { BotService } from './telegram/bot.service';
     BotModule,
   ],
   controllers: [ExternalApiController],
-  providers: [ExternalApiService, ExternalApiProcessor, BotService],
+  providers: [ExternalApiService, ExternalApiProcessor, BotService, Telegraf],
   exports: [ExternalApiService, BotService],
 })
 export class AppModule {}

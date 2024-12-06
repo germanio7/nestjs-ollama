@@ -20,6 +20,8 @@ async function bootstrap() {
   app.use(bot.webhookCallback('/secret-path'));
 
   bot.on('text', (ctx) => botService.handleTextMessage(ctx));
+  bot.on('message', (ctx) => botService.handleTextMessage(ctx));
+  bot.start((ctx) => botService.handleStart(ctx)); // no funca
 
   await app.listen(process.env.PORT ?? 3000);
 }
