@@ -39,16 +39,10 @@ export class ExternalApiService {
         const from = payload.entry[0].changes[0].value.messages[0].from;
         const message = payload.entry[0].changes[0].value.messages[0].text.body;
 
-        const result = await this.sendData({
-          model: 'llama3.2',
-          prompt: message,
-          stream: false,
+        const job = await this.messageQueue.add('sendMessage', {
+          from: from,
+          message: message
         });
-
-        const resultSendWhatsapp = await this.sendWhatsapp(
-          from,
-          result.response,
-        );
       }
 
       return;
