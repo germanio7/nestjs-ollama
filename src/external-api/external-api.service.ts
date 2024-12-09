@@ -18,6 +18,7 @@ export class ExternalApiService {
       this.httpService.post(`${apiUrl}/api/generate`, {
         model: 'llama3.2',
         system: 'Eres un experto en el tema. Responde siempre en español.',
+        options: { temperature: 0.2 },
         prompt: prompt,
         stream: false,
       }),
