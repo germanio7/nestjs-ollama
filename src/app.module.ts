@@ -22,7 +22,7 @@ import { Telegraf } from 'telegraf';
       },
     }),
     BullModule.registerQueue({
-      name: 'messageQueue', // Name of the queue
+      name: 'messageQueue',
     }),
     BotModule,
   ],

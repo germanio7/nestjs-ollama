@@ -15,11 +15,7 @@ export class ExternalApiProcessor extends WorkerHost {
 
   async process(job: any) {
     const { from, message, telegram_id } = job.data;
-    const result = await this.externalApiservice.sendData({
-      model: 'llama3.2',
-      prompt: message,
-      stream: false,
-    });
+    const result = await this.externalApiservice.sendPrompt(message);
 
     try {
       if (from) {

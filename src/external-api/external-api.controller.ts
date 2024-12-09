@@ -5,9 +5,9 @@ import { ExternalApiService } from './external-api.service';
 export class ExternalApiController {
     constructor(private readonly externalApiService: ExternalApiService) {}
 
-  @Post('ollama')
-  async sendData(@Body() bodyData: any) {
-    return await this.externalApiService.sendData(bodyData);
+  @Post('send-prompt')
+  async sendPrompt(@Body() bodyData: any) {
+    return await this.externalApiService.sendPrompt(bodyData.prompt);
   }
     
   @Get('whatsapp-webhook')

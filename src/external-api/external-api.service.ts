@@ -12,10 +12,15 @@ export class ExternalApiService {
     @InjectQueue('messageQueue') private messageQueue: Queue,
   ) {}
 
-  async sendData(bodyData: any) {
+  async sendPrompt(prompt: string) {
     const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
     const { data } = await firstValueFrom(
-      this.httpService.post(`${apiUrl}/api/generate`, bodyData),
+      this.httpService.post(`${apiUrl}/api/generate`, {
+        model: 'llama3.2',
+        system: 'Eres un experto en el tema. Responde siempre en español.',
+        prompt: prompt,
+        stream: false,
+      }),
     );
     return data;
   }
