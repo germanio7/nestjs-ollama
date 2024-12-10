@@ -22,6 +22,7 @@ export class ExternalApiProcessor extends WorkerHost {
         this.externalApiservice.sendWhatsapp(from, result.response);
       }
       if (telegram_id) {
+        console.log(telegram_id);
         this.bot = new Telegraf(
           this.configService.get<string>('TELEGRAM_BOT_TOKEN'),
         );
