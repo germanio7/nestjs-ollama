@@ -16,7 +16,6 @@ export class BotService {
   }
 
   async handleTextMessage(ctx) {
-    console.log(ctx.message.text);
     await this.messageQueue.add('sendMessage', {
       message: ctx.message.text,
       telegram_id: ctx.message.chat.id,
