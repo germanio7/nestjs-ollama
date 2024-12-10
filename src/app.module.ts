@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ExternalApiService } from './external-api/external-api.service';
 import { ExternalApiController } from './external-api/external-api.controller';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { ExternalApiProcessor } from './external-api/external-api.processor';
 import { BotModule } from './telegram/bot.module';
@@ -15,11 +15,14 @@ import { Telegraf } from 'telegraf';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
+    BullModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('BULL_HOST'),
+          port: parseInt(configService.get<string>('BULL_PORT'), 10),
+        },
+      }),
+      inject: [ConfigService],
     }),
     BullModule.registerQueue({
       name: 'messageQueue',
