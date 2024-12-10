@@ -26,6 +26,42 @@ export class ExternalApiService {
     return data;
   }
 
+  async chat(message: string) {
+    let messages = [
+      {
+        role: 'system',
+        content:
+          'Eres un recepcionista del hotel Bariloche, de la ciuidad de Villa Angela Chaco Argentina. Responde siempre en español y de manera amable.',
+      },
+      {
+        role: 'user',
+        content: message,
+      },
+    ];
+
+    const data = await this.makeChatRequest(messages);
+
+    let response = data;
+
+    if (data.message.tool_calls && data.message.tool_calls.length > 0) {
+      if (
+        data.message.tool_calls[0].function.arguments.current_date == 'true'
+      ) {
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        messages.push({
+          role: 'assistant',
+          content: currentDate,
+        });
+        const data = await this.makeChatRequest(messages);
+
+        response = data;
+      }
+    }
+
+    return response;
+  }
+
   async subscriptionWebhook(payload: any) {
     try {
       return payload['hub.challenge'];
@@ -85,5 +121,38 @@ export class ExternalApiService {
       console.error('Error enviando whatsapp:', error);
       return;
     }
+  }
+
+  private async makeChatRequest(messages: Array<object>) {
+    const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
+    const { data } = await firstValueFrom(
+      this.httpService.post(`${apiUrl}/api/chat`, {
+        model: 'llama3.2',
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'fecha_actual',
+              description: 'Obtiene la fecha actual',
+              parameters: {
+                type: 'boolean',
+                properties: {
+                  current_date: {
+                    type: 'boolean',
+                    description: 'Fecha actual',
+                  },
+                },
+                required: ['current_date'],
+              },
+            },
+          },
+        ],
+        options: { temperature: 0.2 },
+        messages: messages,
+        stream: false,
+      }),
+    );
+
+    return data;
   }
 }
