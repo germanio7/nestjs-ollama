@@ -3,13 +3,18 @@ import { ExternalApiService } from './external-api.service';
 
 @Controller('external-api')
 export class ExternalApiController {
-    constructor(private readonly externalApiService: ExternalApiService) {}
+  constructor(private readonly externalApiService: ExternalApiService) {}
 
   @Post('send-prompt')
   async sendPrompt(@Body() bodyData: any) {
     return await this.externalApiService.sendPrompt(bodyData.prompt);
   }
-    
+
+  @Post('chat')
+  async chat(@Body() bodyData: any) {
+    return await this.externalApiService.chat(bodyData.message);
+  }
+
   @Get('whatsapp-webhook')
   async subscriptionWebhook(@Query() query: Record<string, string>) {
     return this.externalApiService.subscriptionWebhook(query);
