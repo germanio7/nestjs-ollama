@@ -7,10 +7,10 @@ services:
     depends_on:
       - redis
       - ollama
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - OLLAMA_API_URL=http://ollama:11434
+    # environment:
+    #   - REDIS_HOST=redis
+    #   - REDIS_PORT=6379
+    #   - OLLAMA_API_URL=http://ollama:11434
     networks:
       - app-network
 
