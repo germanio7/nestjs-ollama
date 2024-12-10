@@ -5,7 +5,7 @@ Nestjs + Ollama + Telegram + Whatsapp
 ## Project setup
 
 ```bash
-$ docker-compose up --build
+$ docker-compose up -d --build
 ```
 
 ## Download model llama3.2
