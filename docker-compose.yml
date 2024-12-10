@@ -31,7 +31,7 @@ services:
       - ollama:/root/.ollama
     networks:
       - app-network
-    # command: ["run", "llama3.2"]
+    # command: ["pull", "llama3.2"]
 
 networks:
   app-network:
