@@ -1,5 +1,18 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { extname } from 'path';
 import { ExternalApiService } from './external-api.service';
+import * as fs from 'fs';
 
 @Controller('external-api')
 export class ExternalApiController {
@@ -11,8 +24,22 @@ export class ExternalApiController {
   }
 
   @Post('chat')
-  async chat(@Body() bodyData: any) {
-    return await this.externalApiService.chat(bodyData.message);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const fileExtName = extname(file.originalname);
+          const randomName = uuidv4();
+          cb(null, `${randomName}${fileExtName}`);
+        },
+      }),
+    }),
+  )
+  async chat(@Body() bodyData: any, @UploadedFile() file: any) {
+    const fileBuffer = fs.readFileSync(file.path);
+    const base64Encoded = fileBuffer.toString('base64');
+    return await this.externalApiService.chat(bodyData.message, base64Encoded);
   }
 
   @Get('whatsapp-webhook')

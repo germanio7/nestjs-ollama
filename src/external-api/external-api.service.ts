@@ -27,38 +27,44 @@ export class ExternalApiService {
     return response;
   }
 
-  async chat(message: string) {
+  async chat(message: string, file: Base64URLString) {
+    let model = 'llama3.2';
+    if (file) {
+      model = 'llama3.2-vision';
+    }
+
     let messages = [
-      {
-        role: 'system',
-        content:
-          'Eres un recepcionista del hotel Bariloche, de la ciuidad de Villa Angela Chaco Argentina. Responde siempre en español y de manera amable.',
-      },
+      // {
+      //   role: 'system',
+      //   content:
+      //     'Eres un experto en todos los temas. Responde siempre en español y de manera amable.',
+      // },
       {
         role: 'user',
         content: message,
+        images: [file],
       },
     ];
 
-    const data = await this.makeChatRequest(messages);
+    const data = await this.makeChatRequest(messages, model);
 
     let response = data;
 
-    if (data.message.tool_calls && data.message.tool_calls.length > 0) {
-      if (
-        data.message.tool_calls[0].function.arguments.current_date == 'true'
-      ) {
-        const currentDate = new Date().toISOString().split('T')[0];
+    // if (data.message.tool_calls && data.message.tool_calls.length > 0) {
+    //   if (
+    //     data.message.tool_calls[0].function.arguments.current_date == 'true'
+    //   ) {
+    //     const currentDate = new Date().toISOString().split('T')[0];
 
-        messages.push({
-          role: 'assistant',
-          content: currentDate,
-        });
-        const data = await this.makeChatRequest(messages);
+    //     messages.push({
+    //       role: 'assistant',
+    //       content: currentDate,
+    //     });
+    //     const data = await this.makeChatRequest(messages, model);
 
-        response = data;
-      }
-    }
+    //     response = data;
+    //   }
+    // }
 
     return response;
   }
@@ -124,30 +130,30 @@ export class ExternalApiService {
     }
   }
 
-  private async makeChatRequest(messages: any) {
+  private async makeChatRequest(messages: any, model: string) {
     const response = await this.ollama.chat({
-      model: 'llama3.2',
+      model: model,
       messages: messages,
       stream: false,
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'fecha_actual',
-            description: 'Obtiene la fecha actual',
-            parameters: {
-              type: 'boolean',
-              properties: {
-                current_date: {
-                  type: 'boolean',
-                  description: 'Fecha actual',
-                },
-              },
-              required: ['current_date'],
-            },
-          },
-        },
-      ],
+      // tools: [
+      //   {
+      //     type: 'function',
+      //     function: {
+      //       name: 'fecha_actual',
+      //       description: 'Obtiene la fecha actual',
+      //       parameters: {
+      //         type: 'boolean',
+      //         properties: {
+      //           current_date: {
+      //             type: 'boolean',
+      //             description: 'Fecha actual',
+      //           },
+      //         },
+      //         required: ['current_date'],
+      //       },
+      //     },
+      //   },
+      // ],
       options: { temperature: 0.2 },
     });
 
