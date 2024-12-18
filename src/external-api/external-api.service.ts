@@ -1,29 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
+import { Ollama } from 'ollama';
+
 @Injectable()
 export class ExternalApiService {
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
+    private ollama: Ollama,
     @InjectQueue('messageQueue') private messageQueue: Queue,
   ) {}
 
   async sendPrompt(prompt: string) {
-    const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
-    const { data } = await firstValueFrom(
-      this.httpService.post(`${apiUrl}/api/generate`, {
-        model: 'llama3.2',
-        system: 'Eres un experto en el tema. Responde siempre en español.',
-        options: { temperature: 0.2 },
-        prompt: prompt,
-        stream: false,
-      }),
-    );
-    return data;
+    const response = await this.ollama.generate({
+      model: 'llama3.2',
+      system: 'Eres un experto en el tema. Responde siempre en español.',
+      options: { temperature: 0.2 },
+      prompt: prompt,
+      stream: false,
+    });
+
+    return response;
   }
 
   async chat(message: string) {
@@ -123,36 +124,33 @@ export class ExternalApiService {
     }
   }
 
-  private async makeChatRequest(messages: Array<object>) {
-    const apiUrl = this.configService.get<string>('OLLAMA_API_URL');
-    const { data } = await firstValueFrom(
-      this.httpService.post(`${apiUrl}/api/chat`, {
-        model: 'llama3.2',
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'fecha_actual',
-              description: 'Obtiene la fecha actual',
-              parameters: {
-                type: 'boolean',
-                properties: {
-                  current_date: {
-                    type: 'boolean',
-                    description: 'Fecha actual',
-                  },
+  private async makeChatRequest(messages: any) {
+    const response = await this.ollama.chat({
+      model: 'llama3.2',
+      messages: messages,
+      stream: false,
+      tools: [
+        {
+          type: 'function',
+          function: {
+            name: 'fecha_actual',
+            description: 'Obtiene la fecha actual',
+            parameters: {
+              type: 'boolean',
+              properties: {
+                current_date: {
+                  type: 'boolean',
+                  description: 'Fecha actual',
                 },
-                required: ['current_date'],
               },
+              required: ['current_date'],
             },
           },
-        ],
-        options: { temperature: 0.2 },
-        messages: messages,
-        stream: false,
-      }),
-    );
+        },
+      ],
+      options: { temperature: 0.2 },
+    });
 
-    return data;
+    return response;
   }
 }

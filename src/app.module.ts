@@ -8,6 +8,7 @@ import { ExternalApiProcessor } from './external-api/external-api.processor';
 import { BotModule } from './telegram/bot.module';
 import { BotService } from './telegram/bot.service';
 import { Telegraf } from 'telegraf';
+import { Ollama } from 'ollama';
 
 @Module({
   imports: [
@@ -30,7 +31,13 @@ import { Telegraf } from 'telegraf';
     BotModule,
   ],
   controllers: [ExternalApiController],
-  providers: [ExternalApiService, ExternalApiProcessor, BotService, Telegraf],
+  providers: [
+    ExternalApiService,
+    ExternalApiProcessor,
+    BotService,
+    Telegraf,
+    Ollama,
+  ],
   exports: [ExternalApiService, BotService],
 })
 export class AppModule {}
