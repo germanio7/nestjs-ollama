@@ -40,12 +40,15 @@ services:
     volumes:
         - ./nginx.conf:/etc/nginx/conf.d/default.conf
         - .:/var/www
+        - ./certbot/conf:/etc/letsencrypt
+        - ./certbot/www:/var/www/certbot
     ports:
         - "80:80"
     networks:
         - app-network
     depends_on:
         - nestjs-app
+        - certbot
   
   certbot:
     image: certbot/certbot
