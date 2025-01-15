@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main  # Este es el branch de producción
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout del código
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Configurar SSH para acceder al VPS
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Cargar variables de entorno desde el secret ENV
+    - name: Create .env file from secret
+      run: echo "${{ secrets.ENV }}" > .env
+
+    # Desplegar en el VPS usando SSH
+    - name: Deploy to VPS
+      run: |
+        scp -o StrictHostKeyChecking=no .env ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:/var/app/.env
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} << 'EOF'
+          cd /var/app/ 
+          docker compose down
+          git fetch && git reset --hard "origin/main"
+          docker compose -f docker-compose.prod.yml up -d --build
+        EOF
